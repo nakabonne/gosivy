@@ -23,9 +23,8 @@ const (
 
 type runner func(ctx context.Context, t terminalapi.Terminal, c *container.Container, opts ...termdash.Option) error
 
-func Run(meta *stats.Meta, statsCh <-chan *stats.Stats) error {
-	// TODO: Remove
-	time.Sleep(time.Hour)
+// Run stats drawing charts, and blocks until the quit operation is performed.
+func Run(ctx context.Context, redrawIntarval time.Duration, meta *stats.Meta, statsCh <-chan *stats.Stats) error {
 	var (
 		t   terminalapi.Terminal
 		err error
@@ -39,9 +38,9 @@ func Run(meta *stats.Meta, statsCh <-chan *stats.Stats) error {
 		return fmt.Errorf("failed to generate terminal interface: %w", err)
 	}
 	defer t.Close()
-	return run(t, termdash.Run)
+	return run(ctx, t, termdash.Run)
 }
 
-func run(t terminalapi.Terminal, r runner) error {
+func run(ctx context.Context, t terminalapi.Terminal, r runner) error {
 	return nil
 }

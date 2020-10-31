@@ -26,7 +26,7 @@ func Run(addr *net.TCPAddr, scrapeInterval time.Duration) error {
 	if err != nil {
 		return err
 	}
-	return gui.Run(meta, statsCh)
+	return gui.Run(ctx, scrapeInterval, meta, statsCh)
 }
 
 func startScraping(ctx context.Context, addr *net.TCPAddr, interval time.Duration, statsCh chan<- *stats.Stats) (*stats.Meta, error) {
