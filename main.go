@@ -11,6 +11,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/k0kubun/pp"
 	"github.com/sirupsen/logrus"
@@ -19,6 +20,8 @@ import (
 	"github.com/nakabonne/gosivy/diagnoser"
 	"github.com/nakabonne/gosivy/pidfile"
 )
+
+const defaultScrapeInterval = time.Second
 
 var (
 	flagSet = flag.NewFlagSet("gosivy", flag.ContinueOnError)
@@ -30,11 +33,12 @@ var (
 )
 
 type cli struct {
-	debug   bool
-	version bool
-	list    bool
-	stdout  io.Writer
-	stderr  io.Writer
+	debug          bool
+	version        bool
+	list           bool
+	scrapeInterval time.Duration
+	stdout         io.Writer
+	stderr         io.Writer
 }
 
 func (c *cli) usage() {
@@ -69,6 +73,7 @@ func parseFlags(stdout, stderr io.Writer) (*cli, error) {
 	flagSet.BoolVarP(&c.version, "version", "v", false, "Print the current version.")
 	flagSet.BoolVar(&c.debug, "debug", false, "Run in debug mode.")
 	flagSet.BoolVarP(&c.list, "list-processes", "l", false, "Show processes where gosivy agent runs on.")
+	flagSet.DurationVar(&c.scrapeInterval, "scrape-interval", defaultScrapeInterval, "Interval to scrape from the agent. It must be >= 1s")
 	flagSet.Usage = c.usage
 	if err := flagSet.Parse(os.Args[1:]); err != nil {
 		if !errors.Is(err, flag.ErrHelp) {
@@ -76,13 +81,25 @@ func parseFlags(stdout, stderr io.Writer) (*cli, error) {
 		}
 		return nil, err
 	}
+
 	return c, nil
+}
+
+func (c *cli) validate() error {
+	if c.scrapeInterval < time.Second {
+		return fmt.Errorf(`"--scrape-interval" must be >= 1s`)
+	}
+	return nil
 }
 
 func (c *cli) run(args []string) int {
 	if c.version {
 		fmt.Fprintf(c.stderr, "version=%s, commit=%s, buildDate=%s, os=%s, arch=%s\n", version, commit, date, runtime.GOOS, runtime.GOARCH)
 		return 0
+	}
+	if err := c.validate(); err != nil {
+		fmt.Fprintln(c.stderr, err)
+		return 1
 	}
 	if err := setLogger(nil, c.debug); err != nil {
 		fmt.Fprintf(c.stderr, "failed to prepare for debugging: %v\n", err)
@@ -105,7 +122,7 @@ func (c *cli) run(args []string) int {
 			return 1
 		}
 	}
-	if err := diagnoser.Run(addr); err != nil {
+	if err := diagnoser.Run(addr, c.scrapeInterval); err != nil {
 		fmt.Fprintf(c.stderr, "failed to start diagnoser: %s\n", err.Error())
 		c.usage()
 		return 1

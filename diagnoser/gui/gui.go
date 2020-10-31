@@ -17,8 +17,8 @@ import (
 
 const (
 	// How often termdash redraws the screen.
-	redrawInterval = 250 * time.Millisecond
-	rootID         = "root"
+	defaultRedrawInterval = time.Second
+	rootID                = "root"
 )
 
 type runner func(ctx context.Context, t terminalapi.Terminal, c *container.Container, opts ...termdash.Option) error

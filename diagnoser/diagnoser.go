@@ -1,3 +1,5 @@
+// Package diagnoser mainly provides two components, scraper and GUI
+// for the process diagnosis.
 package diagnoser
 
 import (
@@ -13,21 +15,21 @@ import (
 	"github.com/nakabonne/gosivy/stats"
 )
 
-const defaultRequestInterval = time.Second
-
-func Run(addr *net.TCPAddr) error {
+// Run performs the scraper which periodically scrapes from the agent,
+// and then draws charts to show the stats.
+func Run(addr *net.TCPAddr, scrapeInterval time.Duration) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	statsCh := make(chan *stats.Stats)
-	meta, err := poll(ctx, addr, statsCh)
+	meta, err := startScraping(ctx, addr, scrapeInterval, statsCh)
 	if err != nil {
 		return err
 	}
 	return gui.Run(meta, statsCh)
 }
 
-func poll(ctx context.Context, addr *net.TCPAddr, statsCh chan<- *stats.Stats) (*stats.Meta, error) {
+func startScraping(ctx context.Context, addr *net.TCPAddr, interval time.Duration, statsCh chan<- *stats.Stats) (*stats.Meta, error) {
 	conn, err := net.DialTCP("tcp", nil, addr)
 	if err != nil {
 		return nil, err
@@ -48,7 +50,7 @@ func poll(ctx context.Context, addr *net.TCPAddr, statsCh chan<- *stats.Stats) (
 	}
 
 	go func(ctx context.Context, ch chan<- *stats.Stats) {
-		tick := time.NewTicker(defaultRequestInterval)
+		tick := time.NewTicker(interval)
 		defer tick.Stop()
 		for {
 			select {
@@ -64,19 +66,19 @@ func poll(ctx context.Context, addr *net.TCPAddr, statsCh chan<- *stats.Stats) (
 
 				buf := []byte{stats.SignalStats}
 				if _, err := conn.Write(buf); err != nil {
-					logrus.Errorf("failed to write: %v", err)
+					logrus.Errorf("failed to write into connection: %v", err)
 					continue
 				}
 				res, err := ioutil.ReadAll(conn)
 				if err != nil {
-					logrus.Errorf("failed to read: %v", err)
+					logrus.Errorf("failed to read the response: %v", err)
 					continue
 				}
 				conn.Close()
 
 				var stats stats.Stats
 				if err := json.Unmarshal(res, &stats); err != nil {
-					logrus.Errorf("failed to unmarshal stats: %v", err)
+					logrus.Errorf("failed to decode stats: %v", err)
 					continue
 				}
 				ch <- &stats
