@@ -12,13 +12,10 @@ import (
 	"net"
 	"os"
 	"os/signal"
-	"runtime"
 	"strconv"
 	"strings"
 	"sync"
 	"syscall"
-
-	"github.com/shirou/gopsutil/process"
 
 	"github.com/nakabonne/gosivy/pidfile"
 	"github.com/nakabonne/gosivy/stats"
@@ -158,22 +155,11 @@ func listen() {
 }
 
 func handle(conn io.ReadWriter, msg []byte) error {
-	// TODO: Make it singleton if possible.
-	process, err := process.NewProcess(int32(os.Getpid()))
-	if err != nil {
-		return err
-	}
 	switch msg[0] {
 	case stats.SignalMeta:
-		meta := stats.Meta{
-			GoMaxProcs: runtime.GOMAXPROCS(0),
-			NumCPU:     runtime.NumCPU(),
-		}
-		if u, err := process.Username(); err == nil {
-			meta.Username = u
-		}
-		if c, err := process.Cmdline(); err == nil {
-			meta.Cmmand = c
+		meta, err := stats.NewMeta()
+		if err != nil {
+			return err
 		}
 		b, err := json.Marshal(meta)
 		if err != nil {
@@ -182,12 +168,9 @@ func handle(conn io.ReadWriter, msg []byte) error {
 		_, err = conn.Write(b)
 		return err
 	case stats.SignalStats:
-		s := stats.Stats{
-			Goroutines: runtime.NumGoroutine(),
-		}
-		runtime.ReadMemStats(&s.MemStats)
-		if c, err := process.CPUPercent(); err == nil {
-			s.CPUUsage = c
+		s, err := stats.NewStats()
+		if err != nil {
+			return err
 		}
 		b, err := json.Marshal(s)
 		if err != nil {
