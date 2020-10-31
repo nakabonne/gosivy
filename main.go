@@ -13,7 +13,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/k0kubun/pp"
 	"github.com/sirupsen/logrus"
 	flag "github.com/spf13/pflag"
 
@@ -161,7 +160,6 @@ func targetToAddr(target string) (*net.TCPAddr, error) {
 func setLogger(w io.Writer, debug bool) error {
 	if !debug {
 		logrus.SetOutput(ioutil.Discard)
-		pp.SetDefaultOutput(ioutil.Discard)
 		return nil
 	}
 	if w == nil {
@@ -180,6 +178,5 @@ func setLogger(w io.Writer, debug bool) error {
 	}
 	logrus.SetOutput(w)
 	logrus.SetLevel(logrus.TraceLevel)
-	pp.SetDefaultOutput(w)
 	return nil
 }
