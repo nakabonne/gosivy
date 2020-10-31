@@ -1,0 +1,8 @@
+gosivy
+===============
+
+This product contains a modified part of gops, distributed by google:
+
+  * License: https://github.com/google/gops/blob/master/LICENSE (BSD 3-Clause "New" or "Revised" License)
+  * Homepage: https://github.com/google/gops
+
