@@ -1,6 +1,7 @@
 package stats
 
 import (
+	"fmt"
 	"os"
 	"runtime"
 
@@ -10,6 +11,7 @@ import (
 // Meta represents process metadata, which will be not changed
 // as long as the process continues.
 type Meta struct {
+	PID        int
 	Username   string
 	Command    string
 	GoMaxProcs int
@@ -31,9 +33,21 @@ func NewMeta() (*Meta, error) {
 		command = c
 	}
 	return &Meta{
+		PID:        os.Getpid(),
 		Username:   username,
 		Command:    command,
 		GoMaxProcs: runtime.GOMAXPROCS(0),
 		NumCPU:     runtime.NumCPU(),
 	}, nil
+}
+
+func (m *Meta) String() string {
+	return fmt.Sprintf(
+		"PID: %d, CMD: %s, User: %s, Num CPU: %d, GOPAXPROS: %d",
+		m.PID,
+		m.Command,
+		m.Username,
+		m.NumCPU,
+		m.GoMaxProcs,
+	)
 }
