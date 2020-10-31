@@ -7,7 +7,7 @@ Gosivy lets you diagnose the Go process no matter where it's running on, and vis
 ## Installation
 Binary releases are available through [here](https://github.com/nakabonne/gosivy/releases).
 
-#### Homebrew
+#### MacOS
 
 ```
 brew install nakabonne/gosivy/gosivy
@@ -55,7 +55,7 @@ gosivy
 First up, you start the agent in the process where you want to collect statistics. Then execute `gosivy` to scrape from the agent periodically. You can diagnose processes running not only locally (local mode), but also on another host (remote mode).
 
 ### Local Mode
-To diagnose a Go process running locally, launch agent as:
+Import `github.com/nakabonne/gosivy/agent` into the target application to launch the agent. See the [local example](https://github.com/nakabonne/gosivy/blob/main/examples/local/main.go).
 
 ```go
 package main
@@ -74,8 +74,6 @@ func main() {
 	defer agent.Close()
 }
 ```
-See the [local example](https://github.com/nakabonne/gosivy/blob/main/examples/local/main.go).
-
 
 With `-l` flag can list the processes where the agent rns on:
 ```
@@ -112,6 +110,22 @@ Give the target's agent address:
 gosivy host.xz:8080
 ```
 
+### Settings
+Command-line options are:
+
+```
+Usage:
+  gosivy [flags] <pid|host:port>
+
+Flags:
+      --debug                      Run in debug mode.
+  -l, --list-processes             Show processes where gosivy agent runs on.
+      --scrape-interval duration   Interval to scrape from the agent. It must be >= 1s (default 1s)
+  -v, --version                    Print the current version.
+```
+
+Gosivy requires the config directory for pid management. By default it will be created undernearth `$HOME/.config` (`APPDATA` on windows). For those who want to assign another directory, `GOSIVY_CONFIG_DIR` environment variable is available.
+
 ## Supported Architectures
 The architectures the agent can perform on are:
 
@@ -119,18 +133,22 @@ The architectures the agent can perform on are:
 - Linux i386/amd64/arm(raspberry pi)
 - Windows/amd64
 - Darwin i386/amd64
-- OpenBSD amd64 (Thank you @mpfz0r!)
-- Solaris amd64 (developed and tested on SmartOS/Illumos, Thank you @jen20!)
+- OpenBSD amd64
+- Solaris amd64
 
 Those partially supported:
-- CPU on DragonFly BSD (#893, Thank you @gballet!)
-- host on Linux RISC-V (#896, Thank you @tklauser!)
+- CPU on DragonFly BSD
+- host on Linux RISC-V
 
 ## Built With
 - [shirou/gopsutil](https://github.com/shirou/gopsutil)
 - [mum4k/termdash](https://github.com/mum4k/termdash)
   - [nsf/termbox-go](https://github.com/nsf/termbox-go)
-  
+
 ## Inspired By
 - [google/gops](https://github.com/google/gops)
 - [arl/statsviz](https://github.com/arl/statsviz)
+
+
+## Author
+Ryo Nakao <<ryo@nakao.dev>>
