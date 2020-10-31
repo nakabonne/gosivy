@@ -75,13 +75,12 @@ func main() {
 }
 ```
 
-With `-l` flag can list the processes where the agent rns on:
+With `-l` flag can list the processes where the agent runs on:
 ```
 gosivy -l
 ```
 
 Give the PID of the process to be diagnosed:
-
 ```
 gosivy 5000
 ```
