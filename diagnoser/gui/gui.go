@@ -8,10 +8,14 @@ import (
 	"time"
 
 	"github.com/mum4k/termdash"
+	"github.com/mum4k/termdash/cell"
 	"github.com/mum4k/termdash/container"
+	"github.com/mum4k/termdash/container/grid"
+	"github.com/mum4k/termdash/linestyle"
 	"github.com/mum4k/termdash/terminal/tcell"
 	"github.com/mum4k/termdash/terminal/termbox"
 	"github.com/mum4k/termdash/terminal/terminalapi"
+	"github.com/mum4k/termdash/widgets/linechart"
 
 	"github.com/nakabonne/gosivy/stats"
 )
@@ -30,6 +34,8 @@ type GUI struct {
 	StatsCh <-chan *stats.Stats
 	// Metadata of the process where the agent runs on.
 	Metadata stats.Meta
+
+	widgets *widgets
 }
 
 func NewGUI(redrawInterval time.Duration, cancel context.CancelFunc, statsCh <-chan *stats.Stats, metadata *stats.Meta) *GUI {
@@ -73,30 +79,88 @@ func (g *GUI) run(ctx context.Context, t terminalapi.Terminal, r runner) error {
 		return fmt.Errorf("failed to generate container: %w", err)
 	}
 
-	w, err := newWidgets()
+	g.widgets, err = newWidgets(&g.Metadata)
 	if err != nil {
 		return fmt.Errorf("failed to generate widgets: %w", err)
 	}
 
-	gridOpts, err := gridLayout(w)
+	opts, err := gridLayout(g.widgets)
 	if err != nil {
 		return fmt.Errorf("failed to build grid layout: %w", err)
 	}
 
-	if err := c.Update(rootID, gridOpts.base...); err != nil {
+	if err := c.Update(rootID, opts...); err != nil {
 		return fmt.Errorf("failed to update container: %w", err)
 	}
-	k := keybinds(ctx, g.Cancel)
+
+	go g.appendStats(ctx)
+
+	k := keybinds(g.Cancel)
 
 	return r(ctx, t, c, termdash.KeyboardSubscriber(k), termdash.RedrawInterval(g.RedrawInterval))
 }
 
-// gridOpts holds all options in our grid. It basically holds the container
-// options (column, width, padding, etc) of our widgets.
-type gridOpts struct {
-	base []container.Option
+func gridLayout(w *widgets) ([]container.Option, error) {
+	raw1 := grid.RowHeightPerc(4,
+		grid.Widget(w.Metadata, container.Border(linestyle.Light), container.BorderTitle("Press Q to quit")),
+	)
+	raw2 := grid.RowHeightPerc(45,
+		grid.ColWidthPerc(50, grid.Widget(w.CPUChart, container.Border(linestyle.Light), container.BorderTitle("CPU Usage (%)"))),
+		grid.ColWidthPerc(50, grid.Widget(w.GoroutineChart, container.Border(linestyle.Light), container.BorderTitle("Goroutines"))),
+	)
+	raw3 := grid.RowHeightPerc(45,
+		grid.Widget(w.HeapChart, container.Border(linestyle.Light), container.BorderTitle("Heap (MB)")),
+	)
+	builder := grid.New()
+	builder.Add(
+		raw1,
+		raw2,
+		raw3,
+	)
+
+	return builder.Build()
 }
 
-func gridLayout(w *widgets) (*gridOpts, error) {
-	return nil, nil
+// appendStats appends entities as soon as a stats arrives.
+// Note that it doesn't redraw the moment stats are appended.
+func (g *GUI) appendStats(ctx context.Context) {
+	var (
+		cpuUsages  = make([]float64, 0)
+		goroutines = make([]float64, 0)
+		allocs     = make([]float64, 0)
+		idles      = make([]float64, 0)
+		inuses     = make([]float64, 0)
+	)
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case stats := <-g.StatsCh:
+			if stats == nil {
+				continue
+			}
+			cpuUsages = append(cpuUsages, stats.CPUUsage*100)
+			goroutines = append(goroutines, float64(stats.Goroutines))
+			allocs = append(allocs, float64(stats.HeapAlloc/1000000))
+			idles = append(idles, float64(stats.HeapIdle/1000000))
+			inuses = append(inuses, float64(stats.HeapInuse/1000000))
+
+			g.widgets.CPUChart.Series("cpu-usage", cpuUsages,
+				linechart.SeriesCellOpts(cell.FgColor(cell.ColorNumber(87))),
+			)
+			g.widgets.GoroutineChart.Series("goroutines", goroutines,
+				linechart.SeriesCellOpts(cell.FgColor(cell.ColorNumber(87))),
+			)
+			g.widgets.HeapChart.Series("alloc", allocs,
+				linechart.SeriesCellOpts(g.widgets.HeapAllocLegend.cellOpts...),
+			)
+			g.widgets.HeapChart.Series("idle", idles,
+				linechart.SeriesCellOpts(g.widgets.HeapIdelLegend.cellOpts...),
+			)
+			g.widgets.HeapChart.Series("inuse", inuses,
+				linechart.SeriesCellOpts(g.widgets.HeapInuseLegend.cellOpts...),
+			)
+		}
+	}
 }

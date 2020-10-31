@@ -5,6 +5,8 @@ import (
 	"github.com/mum4k/termdash/widgetapi"
 	"github.com/mum4k/termdash/widgets/linechart"
 	"github.com/mum4k/termdash/widgets/text"
+
+	"github.com/nakabonne/gosivy/stats"
 )
 
 type LineChart interface {
@@ -23,6 +25,8 @@ type chartLegend struct {
 }
 
 type widgets struct {
+	Metadata Text
+
 	CPUChart       LineChart
 	GoroutineChart LineChart
 	HeapChart      LineChart
@@ -32,7 +36,12 @@ type widgets struct {
 	HeapInuseLegend chartLegend
 }
 
-func newWidgets() (*widgets, error) {
+func newWidgets(meta *stats.Meta) (*widgets, error) {
+	metadata, err := newText(meta.String())
+	if err != nil {
+		return nil, err
+	}
+
 	cpuChart, err := newLineChart()
 	if err != nil {
 		return nil, err
@@ -62,6 +71,7 @@ func newWidgets() (*widgets, error) {
 		return nil, err
 	}
 	return &widgets{
+		Metadata:        metadata,
 		CPUChart:        cpuChart,
 		GoroutineChart:  goroutineChart,
 		HeapChart:       heapChart,
