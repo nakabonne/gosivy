@@ -46,8 +46,9 @@ type Options struct {
 	ErrorLog io.Writer
 }
 
-// Listen starts the gosivy agent on a host process. It automatically
-// cleans up resources if the running process receives an interrupt.
+// Listen starts the gosivy agent that serves the process statistics.
+// Be sure to call Close() before quitting the main goroutine.
+// It automatically cleans up resources if the running process receives an interrupt.
 //
 // Note that the agent exposes an endpoint via a TCP connection that
 // can be used by any program on the system.
@@ -131,9 +132,9 @@ func gracefulShutdown() {
 }
 
 func listen() {
-	buf := make([]byte, 1)
+	sig := make([]byte, 1)
 	for {
-		fd, err := listener.Accept()
+		conn, err := listener.Accept()
 		if err != nil {
 			// TODO: Find better way to check for closed connection, see: https://golang.org/issues/4373.
 			if !strings.Contains(err.Error(), "use of closed network connection") {
@@ -144,15 +145,15 @@ func listen() {
 			}
 			continue
 		}
-		if _, err := fd.Read(buf); err != nil {
+		if _, err := conn.Read(sig); err != nil {
 			fmt.Fprintf(errLog, "gosivy: %v\n", err)
 			continue
 		}
-		if err := handle(fd, buf); err != nil {
+		if err := handle(conn, sig); err != nil {
 			fmt.Fprintf(errLog, "gosivy: %v\n", err)
 			continue
 		}
-		fd.Close()
+		conn.Close()
 	}
 }
 
