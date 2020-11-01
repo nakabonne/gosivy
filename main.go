@@ -102,27 +102,31 @@ func (c *cli) run(args []string) int {
 		return 1
 	}
 	if c.list {
-		ps, err := process.List()
+		ps, err := process.FindAll()
 		if err != nil {
-			fmt.Fprintf(c.stderr, "failed to list processes: %w", err)
+			fmt.Fprintf(c.stderr, "failed to list processes: %w\n", err)
 			return 1
 		}
 		fmt.Fprintf(c.stderr, "%v", ps)
 		return 0
 	}
 
-	// Try to run diagnoser
-	var addr *net.TCPAddr
+	var pid string
 	if len(args) == 0 {
-		// TODO: Make sure to use the process where the agent runs on.
-		addr = &net.TCPAddr{}
-	} else {
-		var err error
-		addr, err = targetToAddr(args[0])
+		// Automatically finds the process where the agent runs on if no args given.
+		p, err := process.FindOne()
 		if err != nil {
-			fmt.Fprintf(c.stderr, "failed to convert args into addresses: %v\n", err)
+			fmt.Fprintln(c.stderr, err)
 			return 1
 		}
+		pid = strconv.Itoa(p.PID)
+	} else {
+		pid = args[0]
+	}
+	addr, err := targetToAddr(pid)
+	if err != nil {
+		fmt.Fprintf(c.stderr, "failed to convert args into addresses: %v\n", err)
+		return 1
 	}
 	if err := diagnoser.Run(addr, c.scrapeInterval); err != nil {
 		fmt.Fprintf(c.stderr, "failed to start diagnoser: %s\n", err.Error())
