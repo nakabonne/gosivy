@@ -48,7 +48,7 @@ func (c *cli) usage() {
 Flags:
 %s
 Examples:
-  gosivy 8000
+  gosivy 15788
   gosivy host.xz:8080
 
 Author:

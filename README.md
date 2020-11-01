@@ -77,12 +77,14 @@ func main() {
 
 With `-l` flag can list the processes where the agent runs on:
 ```
-gosivy -l
+$ gosivy -l
+PID   Exec Path
+15788 foo  /path/to/foo
 ```
 
 Give the PID of the process to be diagnosed:
 ```
-gosivy 5000
+$ gosivy 15788
 ```
 
 Be sure to start the `gosivy` process as the same user as the target application.
@@ -106,7 +108,7 @@ func main() {
 Give the target's agent address:
 
 ```
-gosivy host.xz:8080
+$ gosivy host.xz:8080
 ```
 
 ### Settings
