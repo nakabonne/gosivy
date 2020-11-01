@@ -130,6 +130,8 @@ func (g *GUI) appendStats(ctx context.Context) {
 		allocs     = make([]float64, 0)
 		idles      = make([]float64, 0)
 		inuses     = make([]float64, 0)
+
+		megaByte uint64 = 1000000
 	)
 
 	for {
@@ -140,11 +142,11 @@ func (g *GUI) appendStats(ctx context.Context) {
 			if stats == nil {
 				continue
 			}
-			cpuUsages = append(cpuUsages, stats.CPUUsage*100)
+			cpuUsages = append(cpuUsages, stats.CPUUsage)
 			goroutines = append(goroutines, float64(stats.Goroutines))
-			allocs = append(allocs, float64(stats.HeapAlloc/1000000))
-			idles = append(idles, float64(stats.HeapIdle/1000000))
-			inuses = append(inuses, float64(stats.HeapInuse/1000000))
+			allocs = append(allocs, float64(stats.HeapAlloc/megaByte))
+			idles = append(idles, float64(stats.HeapIdle/megaByte))
+			inuses = append(inuses, float64(stats.HeapInuse/megaByte))
 
 			g.widgets.CPUChart.Series("cpu-usage", cpuUsages,
 				linechart.SeriesCellOpts(cell.FgColor(cell.ColorNumber(87))),
