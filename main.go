@@ -17,7 +17,6 @@ import (
 	flag "github.com/spf13/pflag"
 
 	"github.com/nakabonne/gosivy/diagnoser"
-	"github.com/nakabonne/gosivy/pidfile"
 	"github.com/nakabonne/gosivy/process"
 )
 
@@ -158,7 +157,7 @@ func targetToAddr(target string) (*net.TCPAddr, error) {
 	if err != nil {
 		return nil, fmt.Errorf("couldn't parse PID: %w", err)
 	}
-	port, err := pidfile.GetPort(pid)
+	port, err := process.GetPort(pid)
 	if err != nil {
 		return nil, fmt.Errorf("couldn't get port for PID %v: %w", pid, err)
 	}
@@ -174,7 +173,7 @@ func setLogger(w io.Writer, debug bool) error {
 	}
 	if w == nil {
 		var err error
-		cfgDir, err := pidfile.ConfigDir()
+		cfgDir, err := process.ConfigDir()
 		if err != nil {
 			return err
 		}

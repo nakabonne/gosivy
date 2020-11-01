@@ -7,8 +7,6 @@ import (
 	"strings"
 
 	"github.com/keybase/go-ps"
-
-	"github.com/nakabonne/gosivy/pidfile"
 )
 
 // Process represents an OS process.
@@ -70,11 +68,11 @@ func List() (Processes, error) {
 			// Ignore system process.
 			continue
 		}
-		pf, err := pidfile.PIDFile(pid)
+		pidfile, err := PIDFile(pid)
 		if err != nil {
 			return nil, fmt.Errorf("failed to find pid file: %w", err)
 		}
-		if _, err := os.Stat(pf); err != nil {
+		if _, err := os.Stat(pidfile); err != nil {
 			// Ignore ps where the agent doesn't run on.
 			continue
 		}

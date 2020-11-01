@@ -17,7 +17,7 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/nakabonne/gosivy/pidfile"
+	"github.com/nakabonne/gosivy/process"
 	"github.com/nakabonne/gosivy/stats"
 )
 
@@ -37,7 +37,7 @@ type Options struct {
 	// By default "127.0.0.1:0" is populated.
 	Addr string
 
-	// Where to emit the error log to. By default os.Stderr is used.
+	// Where to emit the log to. By default os.Stderr is used.
 	LogWriter io.Writer
 }
 
@@ -59,7 +59,7 @@ func Listen(opts Options) error {
 		return fmt.Errorf("gosivy agent already listening at: %v", listener.Addr())
 	}
 
-	cfgDir, err := pidfile.ConfigDir()
+	cfgDir, err := process.ConfigDir()
 	if err != nil {
 		return err
 	}

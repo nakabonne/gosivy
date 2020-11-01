@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package pidfile provides utility functions needed when handling Pid file,
-// which is the file to which the process port is written.
-// Pid file is created when the agent is launched.
-package pidfile
+package process
 
 import (
 	"fmt"
@@ -20,6 +17,8 @@ import (
 
 const ConfigDirEnvKey = "GOSIVY_CONFIG_DIR"
 
+// PIDFile gives back the path to pid file which the process port is written.
+// Pid file is created when the agent is launched.
 func PIDFile(pid int) (string, error) {
 	dir, err := ConfigDir()
 	if err != nil {
