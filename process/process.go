@@ -21,6 +21,11 @@ type Process struct {
 
 type Processes []Process
 
+// String formats as:
+//
+// PID   Exec Path
+// 15788 foo  /path/to/src/foo
+// 14054 main /private/var/folders/sy/5rwqjr1j3kl5r3kwxfgntkfr0000gn/T/go-build227076651/b001/exe/main
 func (ps Processes) String() string {
 	var (
 		b          strings.Builder
