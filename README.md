@@ -36,12 +36,6 @@ Required: >= 1.10. Note that you may have a problem because it downloads an unta
 go get github.com/nakabonne/gosivy
 ```
 
-#### Docker
-
-```
-docker run --rm -it nakabonne/gosivy gosivy
-```
-
 ## Quickstart
 Unsure if Gosivy is for you? Watch Gosivy by using [the example application](https://github.com/nakabonne/gosivy/blob/main/examples/local/main.go).
 
