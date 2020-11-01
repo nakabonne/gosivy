@@ -2,11 +2,9 @@ name: test
 on:
   push:
     branches:
-    - master
-    paths-ignore:
-    - 'README.md'
-    - '.github/'
-    - 'assets/'
+    - main
+    paths:
+      - '**.go'
   pull_request:
     branches:
     - master
