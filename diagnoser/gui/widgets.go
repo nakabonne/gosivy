@@ -56,17 +56,17 @@ func newWidgets(meta *stats.Meta) (*widgets, error) {
 	}
 
 	allocColor := cell.FgColor(cell.ColorYellow)
-	allocText, err := newText("alloc", text.WriteCellOpts(allocColor))
+	allocText, err := newText("... alloc", text.WriteCellOpts(allocColor))
 	if err != nil {
 		return nil, err
 	}
 	idleColor := cell.FgColor(cell.ColorNumber(87))
-	idleText, err := newText("idle", text.WriteCellOpts(idleColor))
+	idleText, err := newText("... idle", text.WriteCellOpts(idleColor))
 	if err != nil {
 		return nil, err
 	}
 	inuseColor := cell.FgColor(cell.ColorGreen)
-	inuseText, err := newText("inuse", text.WriteCellOpts(inuseColor))
+	inuseText, err := newText("... inuse", text.WriteCellOpts(inuseColor))
 	if err != nil {
 		return nil, err
 	}
@@ -84,8 +84,8 @@ func newWidgets(meta *stats.Meta) (*widgets, error) {
 func newLineChart() (LineChart, error) {
 	return linechart.New(
 		linechart.AxesCellOpts(cell.FgColor(cell.ColorRed)),
-		linechart.YLabelCellOpts(cell.FgColor(cell.ColorGreen)),
-		linechart.XLabelCellOpts(cell.FgColor(cell.ColorGreen)),
+		linechart.YLabelCellOpts(cell.FgColor(cell.ColorDefault)),
+		linechart.XLabelCellOpts(cell.FgColor(cell.ColorDefault)),
 	)
 }
 

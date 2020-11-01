@@ -100,6 +100,16 @@ func (g *GUI) run(ctx context.Context, t terminalapi.Terminal, r runner) error {
 	return r(ctx, t, c, termdash.KeyboardSubscriber(k), termdash.RedrawInterval(g.RedrawInterval))
 }
 
+// gridLayout gives back options for grid layout, which is composed by rows that inside of the rows
+// are the columns, the elements are the columns.
+//
+// ----------------------------------------------------
+// [------element------] [--element--] [---element---]
+// ----------------------------------------------------
+// [element] [element] [------------element----------]
+// ----------------------------------------------------
+// [-element-]       [----element----]        [element]
+// ----------------------------------------------------
 func gridLayout(w *widgets) ([]container.Option, error) {
 	raw1 := grid.RowHeightPerc(4,
 		grid.Widget(w.Metadata, container.Border(linestyle.Light), container.BorderTitle("Press Q to quit")),
@@ -112,7 +122,7 @@ func gridLayout(w *widgets) ([]container.Option, error) {
 		[]container.Option{container.Border(linestyle.Light), container.BorderTitle("Heap (MB)")},
 		grid.RowHeightPerc(97, grid.ColWidthPerc(99, grid.Widget(w.HeapChart))),
 		grid.RowHeightPercWithOpts(3,
-			[]container.Option{container.MarginLeftPercent(w.HeapChart.Options().MinimumSize.X)},
+			[]container.Option{container.MarginLeftPercent(0), container.MarginBottomPercent(0)},
 			textsInColumn(w.HeapAllocLegend.text, w.HeapIdelLegend.text, w.HeapInuseLegend.text)...,
 		),
 	)
