@@ -7,11 +7,9 @@ on:
       - '**.go'
   pull_request:
     branches:
-    - master
-    paths-ignore:
-    - 'README.md'
-    - '.github/'
-    - 'assets/'
+    - main
+    paths:
+      - '**.go'
 jobs:
   test:
     strategy:
