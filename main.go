@@ -104,7 +104,7 @@ func (c *cli) run(args []string) int {
 	if c.list {
 		ps, err := process.FindAll()
 		if err != nil {
-			fmt.Fprintf(c.stderr, "failed to list processes: %w\n", err)
+			fmt.Fprintf(c.stderr, "failed to list processes: %v\n", err)
 			return 1
 		}
 		fmt.Fprintf(c.stderr, "%v", ps)
