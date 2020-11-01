@@ -5,4 +5,4 @@ test:
 
 .PHONY: mockgen
 mockgen:
-	mockgen -source=./gui/widgets.go -destination=./gui/widgets.mock.go -package=gui
+	mockgen -source=./diagnoser/gui/widgets.go -destination=./diagnoser/gui/widgets.mock.go -package=gui
