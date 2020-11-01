@@ -27,7 +27,7 @@ apt install ./gosivy_0.1.0_linux_amd64.deb
 ```
 
 #### Go
-Note that you may have a problem because it downloads an untagged binary.
+Required: >= 1.10. Note that you may have a problem because it downloads an untagged binary.
 ```
 go get github.com/nakabonne/gosivy
 ```
