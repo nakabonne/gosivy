@@ -5,7 +5,6 @@ builds:
 - main: .
   binary: gosivy
   goos:
-    - freebsd
     - darwin
     - linux
     - windows
