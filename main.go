@@ -61,7 +61,11 @@ func main() {
 	if err != nil {
 		os.Exit(0)
 	}
-	os.Exit(c.run(flagSet.Args()))
+	code := c.run(flagSet.Args())
+	if code != 0 {
+		c.usage()
+		os.Exit(code)
+	}
 }
 
 func parseFlags(stdout, stderr io.Writer) (*cli, error) {
@@ -84,13 +88,6 @@ func parseFlags(stdout, stderr io.Writer) (*cli, error) {
 	return c, nil
 }
 
-func (c *cli) validate() error {
-	if c.scrapeInterval < time.Second {
-		return fmt.Errorf(`"--scrape-interval" must be >= 1s`)
-	}
-	return nil
-}
-
 func (c *cli) run(args []string) int {
 	if c.version {
 		fmt.Fprintf(c.stderr, "version=%s, commit=%s, buildDate=%s, os=%s, arch=%s\n", version, commit, date, runtime.GOOS, runtime.GOARCH)
@@ -108,11 +105,12 @@ func (c *cli) run(args []string) int {
 		c.listProcesses()
 		return 0
 	}
+
+	// Try to run diagnoser
 	var addr *net.TCPAddr
-	if len(args) <= 0 {
+	if len(args) == 0 {
 		// TODO: Make sure to use the process where the agent runs on.
 		addr = &net.TCPAddr{}
-		return 0
 	} else {
 		var err error
 		addr, err = targetToAddr(args[0])
@@ -123,10 +121,16 @@ func (c *cli) run(args []string) int {
 	}
 	if err := diagnoser.Run(addr, c.scrapeInterval); err != nil {
 		fmt.Fprintf(c.stderr, "failed to start diagnoser: %s\n", err.Error())
-		c.usage()
 		return 1
 	}
 	return 0
+}
+
+func (c *cli) validate() error {
+	if c.scrapeInterval < time.Second {
+		return fmt.Errorf(`"--scrape-interval" must be >= 1s`)
+	}
+	return nil
 }
 
 // targetToAddr parses the target string (pid or host:port),
