@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package agent provides an ability to handle the gosivy agent,
+// which serves the process statistics.
 package agent
 
 import (
@@ -25,7 +27,7 @@ const defaultAddr = "127.0.0.1:0"
 
 var (
 	mu        sync.Mutex
-	portfile  string
+	pidFile   string
 	listener  net.Listener
 	logWriter io.Writer
 )
@@ -55,7 +57,7 @@ func Listen(opts Options) error {
 		logWriter = os.Stderr
 	}
 
-	if portfile != "" {
+	if pidFile != "" {
 		return fmt.Errorf("gosivy agent already listening at: %v", listener.Addr())
 	}
 
@@ -79,8 +81,8 @@ func Listen(opts Options) error {
 	}
 	listener = ln
 	port := listener.Addr().(*net.TCPAddr).Port
-	portfile = fmt.Sprintf("%s/%d", cfgDir, os.Getpid())
-	err = ioutil.WriteFile(portfile, []byte(strconv.Itoa(port)), os.ModePerm)
+	pidFile = fmt.Sprintf("%s/%d", cfgDir, os.Getpid())
+	err = ioutil.WriteFile(pidFile, []byte(strconv.Itoa(port)), os.ModePerm)
 	if err != nil {
 		return err
 	}
@@ -95,9 +97,9 @@ func Close() {
 	mu.Lock()
 	defer mu.Unlock()
 
-	if portfile != "" {
-		os.Remove(portfile)
-		portfile = ""
+	if pidFile != "" {
+		os.Remove(pidFile)
+		pidFile = ""
 	}
 	if listener != nil {
 		listener.Close()
