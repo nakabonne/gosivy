@@ -24,23 +24,21 @@ import (
 const defaultAddr = "127.0.0.1:0"
 
 var (
-	mu       sync.Mutex
-	portfile string
-	listener net.Listener
-	errLog   io.Writer
+	mu        sync.Mutex
+	portfile  string
+	listener  net.Listener
+	logWriter io.Writer
 )
 
 // Options is optional settings for the started agent.
 type Options struct {
 	// The address the agent will be listening at.
 	// It must be in the form of "host:port".
+	// By default "127.0.0.1:0" is populated.
 	Addr string
 
-	// The directory to store the configuration file,
-	ConfigDir string
-
-	// Where to emit the error log to. By default io.Stderr is used.
-	ErrorLog io.Writer
+	// Where to emit the error log to. By default os.Stderr is used.
+	LogWriter io.Writer
 }
 
 // Listen starts the gosivy agent that serves the process statistics.
@@ -52,26 +50,21 @@ type Options struct {
 func Listen(opts Options) error {
 	mu.Lock()
 	defer mu.Unlock()
-	errLog = opts.ErrorLog
-	if errLog == nil {
-		errLog = os.Stderr
+	logWriter = opts.LogWriter
+	if logWriter == nil {
+		logWriter = os.Stderr
 	}
 
 	if portfile != "" {
 		return fmt.Errorf("gosivy agent already listening at: %v", listener.Addr())
 	}
 
-	gosivyDir := opts.ConfigDir
-	if gosivyDir == "" {
-		cfgDir, err := pidfile.ConfigDir()
-		if err != nil {
-			return err
-		}
-		gosivyDir = cfgDir
+	cfgDir, err := pidfile.ConfigDir()
+	if err != nil {
+		return err
 	}
 
-	err := os.MkdirAll(gosivyDir, os.ModePerm)
-	if err != nil {
+	if err := os.MkdirAll(cfgDir, os.ModePerm); err != nil {
 		return err
 	}
 	gracefulShutdown()
@@ -86,7 +79,7 @@ func Listen(opts Options) error {
 	}
 	listener = ln
 	port := listener.Addr().(*net.TCPAddr).Port
-	portfile = fmt.Sprintf("%s/%d", gosivyDir, os.Getpid())
+	portfile = fmt.Sprintf("%s/%d", cfgDir, os.Getpid())
 	err = ioutil.WriteFile(portfile, []byte(strconv.Itoa(port)), os.ModePerm)
 	if err != nil {
 		return err
@@ -135,7 +128,7 @@ func listen() {
 		if err != nil {
 			// TODO: Find better way to check for closed connection, see: https://golang.org/issues/4373.
 			if !strings.Contains(err.Error(), "use of closed network connection") {
-				fmt.Fprintf(errLog, "gosivy: %v\n", err)
+				fmt.Fprintf(logWriter, "gosivy: %v\n", err)
 			}
 			if netErr, ok := err.(net.Error); ok && !netErr.Temporary() {
 				break
@@ -143,11 +136,11 @@ func listen() {
 			continue
 		}
 		if _, err := conn.Read(sig); err != nil {
-			fmt.Fprintf(errLog, "gosivy: %v\n", err)
+			fmt.Fprintf(logWriter, "gosivy: %v\n", err)
 			continue
 		}
 		if err := handle(conn, sig); err != nil {
-			fmt.Fprintf(errLog, "gosivy: %v\n", err)
+			fmt.Fprintf(logWriter, "gosivy: %v\n", err)
 			continue
 		}
 		conn.Close()

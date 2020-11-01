@@ -23,6 +23,8 @@ type MemStats struct {
 	HeapInuse uint64
 }
 
+// NewStats gives back a Stats after getting the statistical data
+// at that point in time. Undesirable to call it at high rate.
 func NewStats() (*Stats, error) {
 	// TODO: Make it singleton if possible.
 	process, err := process.NewProcess(int32(os.Getpid()))
