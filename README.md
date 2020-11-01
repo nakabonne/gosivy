@@ -90,6 +90,7 @@ $ gosivy 15788
 Be sure to start the `gosivy` process as the same user as the target application.
 
 ### Remote Mode
+Give the address the agent listens on:
 ```go
 package main
 
@@ -101,14 +102,19 @@ import (
 )
 
 func main() {
-    // TODO: Start agent
+	err := agent.Listen(agent.Options{
+		Addr: "127.0.0.1:9090",
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer agent.Close()
 }
 ```
 
-Give the target's agent address:
-
+Specify the target's agent addresses accessible by the host where `gosivy` will be executed:
 ```
-$ gosivy host.xz:8080
+$ gosivy host.xz:9090
 ```
 
 ### Settings
