@@ -39,11 +39,11 @@ nfpms:
       - rpm
       - deb
 
-dockers:
-  - dockerfile: Dockerfile
-    binaries:
-      - gosivy
-    image_templates:
-      - "nakabonne/gosivy:latest"
-      - "nakabonne/gosivy:{{ .Tag }}"
-      - "nakabonne/gosivy:v{{ .Major }}.{{ .Minor }}"
+        #dockers:
+        #  - dockerfile: Dockerfile
+        #    binaries:
+        #      - gosivy
+        #    image_templates:
+        #      - "nakabonne/gosivy:latest"
+        #      - "nakabonne/gosivy:{{ .Tag }}"
+        #      - "nakabonne/gosivy:v{{ .Major }}.{{ .Minor }}"
