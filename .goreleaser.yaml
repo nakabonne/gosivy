@@ -1,0 +1,51 @@
+before:
+  hooks:
+    - go mod tidy
+builds:
+- main: .
+  binary: gosivy
+  goos:
+    - freebsd
+    - darwin
+    - linux
+    - windows
+  goarch:
+    - amd64
+    - arm
+    - arm64
+  goarm:
+    - 7
+  env:
+    - CGO_ENABLED=0
+  ldflags: -s -w -X main.version={{.Version}} -X main.commit={{.ShortCommit}} -X main.date={{.Date}}
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  name_template: "{{ .Tag }}-next"
+
+brews:
+  - github:
+      owner: nakabonne
+      name: homebrew-gosivy
+    homepage: 'https://github.com/nakabonne/gosivy'
+    description: 'Real-time visualization tool for Go application diagnosis'
+
+nfpms:
+  - license: MIT
+    maintainer: Ryo Nakao <ryo@nakao.dev>
+    homepage: https://github.com/nakabonne/gosivy
+    description: "Real-time visualization tool for Go application diagnosis"
+    formats:
+      - rpm
+      - deb
+
+dockers:
+  - dockerfile: Dockerfile
+    binaries:
+      - gosivy
+    image_templates:
+      - "nakabonne/gosivy:latest"
+      - "nakabonne/gosivy:{{ .Tag }}"
+      - "nakabonne/gosivy:v{{ .Major }}.{{ .Minor }}"
