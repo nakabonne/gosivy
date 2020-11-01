@@ -55,18 +55,18 @@ func newWidgets(meta *stats.Meta) (*widgets, error) {
 		return nil, err
 	}
 
-	allocColor := cell.FgColor(cell.ColorMagenta)
+	allocColor := cell.FgColor(cell.ColorYellow)
 	allocText, err := newText("alloc", text.WriteCellOpts(allocColor))
 	if err != nil {
 		return nil, err
 	}
-	idleColor := cell.FgColor(cell.ColorGreen)
+	idleColor := cell.FgColor(cell.ColorNumber(87))
 	idleText, err := newText("idle", text.WriteCellOpts(idleColor))
 	if err != nil {
 		return nil, err
 	}
-	inuseColor := cell.FgColor(cell.ColorYellow)
-	inuseText, err := newText("idle", text.WriteCellOpts(inuseColor))
+	inuseColor := cell.FgColor(cell.ColorGreen)
+	inuseText, err := newText("inuse", text.WriteCellOpts(inuseColor))
 	if err != nil {
 		return nil, err
 	}

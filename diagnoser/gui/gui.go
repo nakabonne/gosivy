@@ -108,8 +108,13 @@ func gridLayout(w *widgets) ([]container.Option, error) {
 		grid.ColWidthPerc(50, grid.Widget(w.CPUChart, container.Border(linestyle.Light), container.BorderTitle("CPU Usage (%)"))),
 		grid.ColWidthPerc(50, grid.Widget(w.GoroutineChart, container.Border(linestyle.Light), container.BorderTitle("Goroutines"))),
 	)
-	raw3 := grid.RowHeightPerc(45,
-		grid.Widget(w.HeapChart, container.Border(linestyle.Light), container.BorderTitle("Heap (MB)")),
+	raw3 := grid.RowHeightPercWithOpts(45,
+		[]container.Option{container.Border(linestyle.Light), container.BorderTitle("Heap (MB)")},
+		grid.RowHeightPerc(97, grid.ColWidthPerc(99, grid.Widget(w.HeapChart))),
+		grid.RowHeightPercWithOpts(3,
+			[]container.Option{container.MarginLeftPercent(w.HeapChart.Options().MinimumSize.X)},
+			textsInColumn(w.HeapAllocLegend.text, w.HeapIdelLegend.text, w.HeapInuseLegend.text)...,
+		),
 	)
 	builder := grid.New()
 	builder.Add(
@@ -119,6 +124,14 @@ func gridLayout(w *widgets) ([]container.Option, error) {
 	)
 
 	return builder.Build()
+}
+
+func textsInColumn(texts ...Text) []grid.Element {
+	els := make([]grid.Element, 0, len(texts))
+	for _, text := range texts {
+		els = append(els, grid.ColWidthPerc(3, grid.Widget(text)))
+	}
+	return els
 }
 
 // appendStats appends entities as soon as a stats arrives.
