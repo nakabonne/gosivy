@@ -76,7 +76,7 @@ func main() {
 ```
 
 With `-l` flag can list the processes where the agent runs on:
-```
+```console
 $ gosivy -l
 PID   Exec Path
 15788 foo  /path/to/foo
