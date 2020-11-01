@@ -9,7 +9,10 @@ import (
 )
 
 func main() {
-	if err := agent.Listen(agent.Options{}); err != nil {
+	err := agent.Listen(agent.Options{
+		Addr: "127.0.0.1:9090",
+	})
+	if err != nil {
 		log.Fatal(err)
 	}
 	defer agent.Close()
