@@ -18,6 +18,7 @@ import (
 
 	"github.com/nakabonne/gosivy/diagnoser"
 	"github.com/nakabonne/gosivy/pidfile"
+	"github.com/nakabonne/gosivy/process"
 )
 
 const defaultScrapeInterval = time.Second
@@ -102,7 +103,12 @@ func (c *cli) run(args []string) int {
 		return 1
 	}
 	if c.list {
-		c.listProcesses()
+		ps, err := process.List()
+		if err != nil {
+			fmt.Fprintf(c.stderr, "failed to list processes: %w", err)
+			return 1
+		}
+		fmt.Fprintf(c.stderr, "%v", ps)
 		return 0
 	}
 
