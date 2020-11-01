@@ -111,7 +111,7 @@ func (g *GUI) run(ctx context.Context, t terminalapi.Terminal, r runner) error {
 // [-element-]       [----element----]        [element]
 // ----------------------------------------------------
 func gridLayout(w *widgets) ([]container.Option, error) {
-	raw1 := grid.RowHeightPerc(4,
+	raw1 := grid.RowHeightPerc(5,
 		grid.Widget(w.Metadata, container.Border(linestyle.Light), container.BorderTitle("Press Q to quit")),
 	)
 	raw2 := grid.RowHeightPerc(45,
@@ -122,8 +122,8 @@ func gridLayout(w *widgets) ([]container.Option, error) {
 		[]container.Option{container.Border(linestyle.Light), container.BorderTitle("Heap (MB)")},
 		grid.RowHeightPerc(97, grid.ColWidthPerc(99, grid.Widget(w.HeapChart))),
 		grid.RowHeightPercWithOpts(3,
-			[]container.Option{container.MarginLeftPercent(0), container.MarginBottomPercent(0)},
-			textsInColumn(w.HeapAllocLegend.text, w.HeapIdelLegend.text, w.HeapInuseLegend.text)...,
+			[]container.Option{container.MarginLeftPercent(w.HeapChart.Options().MinimumSize.X)},
+			textsInColumn(w.HeapIdelLegend.text, w.HeapInuseLegend.text, w.HeapAllocLegend.text)...,
 		),
 	)
 	builder := grid.New()
@@ -139,7 +139,9 @@ func gridLayout(w *widgets) ([]container.Option, error) {
 func textsInColumn(texts ...Text) []grid.Element {
 	els := make([]grid.Element, 0, len(texts))
 	for _, text := range texts {
-		els = append(els, grid.ColWidthPerc(3, grid.Widget(text)))
+		// TODO: Make it flexible.
+		//   Currently the width is highly dependent on the size of the device.
+		els = append(els, grid.ColWidthPerc(6, grid.Widget(text)))
 	}
 	return els
 }
