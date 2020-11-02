@@ -2,7 +2,7 @@
 [![Release](https://img.shields.io/github/release/nakabonne/gosivy.svg?color=orange)](https://github.com/nakabonne/gosivy/releases/latest)
 [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/mod/github.com/nakabonne/gosivy?tab=packages)
 
-Yet another visualization tool for Go process metrics.
+Another visualization tool for Go process metrics.
 
 ![Demo](assets/demo.gif)
 
