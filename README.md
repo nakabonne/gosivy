@@ -41,8 +41,8 @@ Unsure if Gosivy is for you? Watch Gosivy by using [the example application](htt
 
 Run the example application:
 ```
-git clone https://github.com/nakabonne/gosivy.git
-go run gosivy/examples/local/main.go
+git clone https://github.com/nakabonne/gosivy.git && cd gosivy
+go run examples/local/main.go
 ```
 
 Then simply perform `gosivy` with no arguments (it automatically finds the process where the agent runs on):
