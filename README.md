@@ -113,7 +113,7 @@ func main() {
 }
 ```
 
-Specify the target's agent addresses accessible by the host where `gosivy` will be executed:
+Specify the target's agent address accessible by the host where `gosivy` will be executed:
 ```
 $ gosivy host.xz:9090
 ```
@@ -133,6 +133,12 @@ Flags:
 ```
 
 Gosivy requires the config directory for pid management. By default it will be created undernearth `$HOME/.config` (`APPDATA` on windows). For those who want to assign another directory, `GOSIVY_CONFIG_DIR` environment variable is available.
+
+## Features
+
+- **Simple** - Show only minimal metrics.
+- **Pull-based monitoring** - The agent is designed to listen on, so the target process does nothing unless you issue a request.
+- **Wherever it's running on** - Any process can be diagnosed as long as you can access the TCP socket the agent opens.
 
 ## Supported Architectures
 The architectures the agent can perform on are:
