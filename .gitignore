@@ -18,3 +18,5 @@ coverage.txt
 
 # Editor
 .idea
+
+.DS_Store
