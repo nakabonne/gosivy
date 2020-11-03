@@ -137,7 +137,7 @@ Gosivy requires the config directory for pid management. By default it will be c
 ## Features
 
 - **Simple** - Show only minimal metrics.
-- **Pull-based monitoring** - The agent is designed to listen on, so the target process does nothing unless you issue a request.
+- **Pull-based monitoring** - The agent is designed to just listen on, so the target process does nothing unless you issue a request.
 - **Wherever it's running on** - Any process can be diagnosed as long as you can access the TCP socket the agent opens.
 
 ## Supported Architectures
