@@ -31,7 +31,7 @@ apt install ./gosivy_0.1.0_linux_amd64.deb
 ```
 
 #### Go
-Required: >= 1.10. Note that you may have a problem because it downloads an untagged binary.
+Required: >= 1.10
 ```
 go get github.com/nakabonne/gosivy
 ```
@@ -49,6 +49,8 @@ Then simply perform `gosivy` with no arguments (it automatically finds the proce
 ```
 gosivy
 ```
+
+Press <kbd>q</kbd> to quit.
 
 ## Usage
 First up, you start the agent in the process where you want to collect statistics. Then execute `gosivy` to scrape from the agent periodically. You can diagnose processes running not only locally (local mode), but also on another host (remote mode).
@@ -135,10 +137,10 @@ Gosivy requires the config directory for pid management. By default it will be c
 ## Supported Architectures
 The architectures the agent can perform on are:
 
-- FreeBSD i386/amd64/arm
-- Linux i386/amd64/arm(raspberry pi)
-- Windows/amd64
 - Darwin i386/amd64
+- Linux i386/amd64/arm(raspberry pi)
+- FreeBSD i386/amd64/arm
+- Windows/amd64
 - OpenBSD amd64
 - Solaris amd64
 
