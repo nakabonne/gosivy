@@ -2,9 +2,12 @@ package gui
 
 import (
 	"context"
+	"fmt"
 	"testing"
-	"time"
 
+	"github.com/mum4k/termdash"
+	"github.com/mum4k/termdash/container"
+	"github.com/mum4k/termdash/terminal/termbox"
 	"github.com/mum4k/termdash/terminal/terminalapi"
 	"github.com/stretchr/testify/assert"
 
@@ -12,37 +15,33 @@ import (
 )
 
 func TestRun(t *testing.T) {
-	type fields struct {
-		RedrawInterval time.Duration
-		Cancel         context.CancelFunc
-		StatsCh        <-chan *stats.Stats
-		Metadata       stats.Meta
-		widgets        *widgets
-	}
-	type args struct {
-		ctx context.Context
-		t   terminalapi.Terminal
-		r   runner
-	}
 	tests := []struct {
 		name    string
-		fields  fields
-		args    args
+		r       runner
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{
+			name: "successful running",
+			r: func(context.Context, terminalapi.Terminal, *container.Container, ...termdash.Option) error {
+				return nil
+			},
+			wantErr: false,
+		},
+		{
+			name: "failed running",
+			r: func(context.Context, terminalapi.Terminal, *container.Container, ...termdash.Option) error {
+				return fmt.Errorf("error")
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := &GUI{
-				RedrawInterval: tt.fields.RedrawInterval,
-				Cancel:         tt.fields.Cancel,
-				StatsCh:        tt.fields.StatsCh,
-				Metadata:       tt.fields.Metadata,
-				widgets:        tt.fields.widgets,
-			}
-			err := g.run(tt.args.ctx, tt.args.t, tt.args.r)
+			ctx, cancel := context.WithCancel(context.Background())
+			g := NewGUI(0, cancel, nil, &stats.Meta{})
+			err := g.run(ctx, &termbox.Terminal{}, tt.r)
 			assert.Equal(t, tt.wantErr, err != nil)
+			cancel()
 		})
 	}
 }
