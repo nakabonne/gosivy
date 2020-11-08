@@ -61,16 +61,11 @@ Import `github.com/nakabonne/gosivy/agent` into the target application to launch
 ```go
 package main
 
-import (
-	"log"
-	"time"
-
-	"github.com/nakabonne/gosivy/agent"
-)
+import "github.com/nakabonne/gosivy/agent"
 
 func main() {
 	if err := agent.Listen(agent.Options{}); err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	defer agent.Close()
 }
@@ -95,19 +90,14 @@ Give the address the agent listens on:
 ```go
 package main
 
-import (
-	"log"
-	"time"
-
-	"github.com/nakabonne/gosivy/agent"
-)
+import "github.com/nakabonne/gosivy/agent"
 
 func main() {
 	err := agent.Listen(agent.Options{
 		Addr: "127.0.0.1:9090",
 	})
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	defer agent.Close()
 }
