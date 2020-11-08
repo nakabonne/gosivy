@@ -111,7 +111,7 @@ func (g *GUI) run(ctx context.Context, t terminalapi.Terminal, r runner) error {
 // [-element-]       [----element----]        [element]
 // ----------------------------------------------------
 func gridLayout(w *widgets) ([]container.Option, error) {
-	raw1 := grid.RowHeightPerc(5,
+	raw1 := grid.RowHeightPerc(7,
 		grid.Widget(w.Metadata, container.Border(linestyle.Light), container.BorderTitle("Press Q to quit")),
 	)
 	raw2 := grid.RowHeightPerc(45,
