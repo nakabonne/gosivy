@@ -1,4 +1,4 @@
-package gui
+package tui
 
 import (
 	"context"
@@ -38,7 +38,7 @@ func TestRun(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
-			g := NewGUI(0, cancel, nil, &stats.Meta{})
+			g := NewTUI(0, cancel, nil, &stats.Meta{})
 			err := g.run(ctx, &termbox.Terminal{}, tt.r)
 			assert.Equal(t, tt.wantErr, err != nil)
 			cancel()

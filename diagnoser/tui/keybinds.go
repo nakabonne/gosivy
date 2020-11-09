@@ -1,4 +1,4 @@
-package gui
+package tui
 
 import (
 	"context"
