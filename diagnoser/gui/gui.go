@@ -149,14 +149,18 @@ func textsInColumn(texts ...Text) []grid.Element {
 // appendStats appends entities as soon as a stats arrives.
 // Note that it doesn't redraw the moment stats are appended.
 func (g *GUI) appendStats(ctx context.Context) {
+	const (
+		// originally based on http://golang.org/doc/progs/eff_bytesize.go
+		_               = iota
+		kilobyte uint64 = 1 << (10 * iota)
+		megabyte
+	)
 	var (
 		cpuUsages  = make([]float64, 0)
 		goroutines = make([]float64, 0)
 		allocs     = make([]float64, 0)
 		idles      = make([]float64, 0)
 		inuses     = make([]float64, 0)
-
-		megaByte uint64 = 1000000
 	)
 
 	for {
@@ -169,9 +173,9 @@ func (g *GUI) appendStats(ctx context.Context) {
 			}
 			cpuUsages = append(cpuUsages, stats.CPUUsage)
 			goroutines = append(goroutines, float64(stats.Goroutines))
-			allocs = append(allocs, float64(stats.HeapAlloc/megaByte))
-			idles = append(idles, float64(stats.HeapIdle/megaByte))
-			inuses = append(inuses, float64(stats.HeapInuse/megaByte))
+			allocs = append(allocs, float64(stats.HeapAlloc/megabyte))
+			idles = append(idles, float64(stats.HeapIdle/megabyte))
+			inuses = append(inuses, float64(stats.HeapInuse/megabyte))
 
 			g.widgets.CPUChart.Series("cpu-usage", cpuUsages,
 				linechart.SeriesCellOpts(cell.FgColor(cell.ColorNumber(87))),
