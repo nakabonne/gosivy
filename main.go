@@ -38,6 +38,7 @@ type cli struct {
 	scrapeInterval time.Duration
 	stdout         io.Writer
 	stderr         io.Writer
+	diagnoser      diagnoser.Diagnoser
 }
 
 func (c *cli) usage() {
@@ -128,7 +129,10 @@ func (c *cli) run(args []string) int {
 		fmt.Fprintf(c.stderr, "failed to convert args into addresses: %v\n", err)
 		return 1
 	}
-	if err := diagnoser.Run(addr, c.scrapeInterval); err != nil {
+	if c.diagnoser == nil {
+		c.diagnoser = diagnoser.NewDiagnoser(addr, c.scrapeInterval, nil)
+	}
+	if err := c.diagnoser.Run(); err != nil {
 		fmt.Fprintf(c.stderr, "failed to start diagnoser: %s\n", err.Error())
 		return 1
 	}

@@ -1,23 +1,27 @@
 package diagnoser
 
 import (
-	"context"
 	"encoding/json"
 	"net"
 	"testing"
 	"time"
 
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/nakabonne/gosivy/stats"
 )
 
-func TestStartScraping(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	addr := startServer()
+func TestRun(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-	_, err := startScraping(ctx, addr, time.Microsecond, make(chan<- *stats.Stats, 100))
+	addr := startServer()
+	m := NewMockGUI(ctrl)
+	m.EXPECT().Run(gomock.Any())
+	d := NewDiagnoser(addr, time.Microsecond, m)
+	err := d.Run()
+
 	time.Sleep(100 * time.Millisecond)
 	assert.Nil(t, err)
 }

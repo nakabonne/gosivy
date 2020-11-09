@@ -1,5 +1,5 @@
-// Package gui provides an ability to draw charts on the terminal.
-package gui
+// Package tui provides an ability to draw charts on the terminal.
+package tui
 
 import (
 	"context"
@@ -25,7 +25,7 @@ const (
 	rootID                = "root"
 )
 
-type GUI struct {
+type TUI struct {
 	// How often termdash redraws the screen.
 	RedrawInterval time.Duration
 	// The function to quit the application.
@@ -38,14 +38,14 @@ type GUI struct {
 	widgets *widgets
 }
 
-func NewGUI(redrawInterval time.Duration, cancel context.CancelFunc, statsCh <-chan *stats.Stats, metadata *stats.Meta) *GUI {
+func NewTUI(redrawInterval time.Duration, cancel context.CancelFunc, statsCh <-chan *stats.Stats, metadata *stats.Meta) *TUI {
 	if redrawInterval == 0 {
 		redrawInterval = defaultRedrawInterval
 	}
 	if statsCh == nil {
 		statsCh = make(<-chan *stats.Stats)
 	}
-	return &GUI{
+	return &TUI{
 		RedrawInterval: redrawInterval,
 		Cancel:         cancel,
 		StatsCh:        statsCh,
@@ -54,7 +54,7 @@ func NewGUI(redrawInterval time.Duration, cancel context.CancelFunc, statsCh <-c
 }
 
 // Run starts drawing charts, and blocks until the quit operation is performed.
-func (g *GUI) Run(ctx context.Context) error {
+func (g *TUI) Run(ctx context.Context) error {
 	var (
 		t   terminalapi.Terminal
 		err error
@@ -73,7 +73,7 @@ func (g *GUI) Run(ctx context.Context) error {
 
 type runner func(ctx context.Context, t terminalapi.Terminal, c *container.Container, opts ...termdash.Option) error
 
-func (g *GUI) run(ctx context.Context, t terminalapi.Terminal, r runner) error {
+func (g *TUI) run(ctx context.Context, t terminalapi.Terminal, r runner) error {
 	c, err := container.New(t, container.ID(rootID))
 	if err != nil {
 		return fmt.Errorf("failed to generate container: %w", err)
@@ -148,7 +148,7 @@ func textsInColumn(texts ...Text) []grid.Element {
 
 // appendStats appends entities as soon as a stats arrives.
 // Note that it doesn't redraw the moment stats are appended.
-func (g *GUI) appendStats(ctx context.Context) {
+func (g *TUI) appendStats(ctx context.Context) {
 	const (
 		// originally based on http://golang.org/doc/progs/eff_bytesize.go
 		_               = iota

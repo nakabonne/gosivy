@@ -1,4 +1,4 @@
-package gui
+package tui
 
 import (
 	"github.com/mum4k/termdash/cell"

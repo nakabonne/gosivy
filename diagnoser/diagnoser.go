@@ -1,4 +1,4 @@
-// Package diagnoser mainly provides two components, scraper and GUI
+// Package diagnoser mainly provides two components, scraper and TUI
 // for the process diagnosis.
 package diagnoser
 
@@ -11,27 +11,51 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/nakabonne/gosivy/diagnoser/gui"
+	"github.com/nakabonne/gosivy/diagnoser/tui"
 	"github.com/nakabonne/gosivy/stats"
 )
 
+type GUI interface {
+	Run(context.Context) error
+}
+
+type Diagnoser interface {
+	Run() error
+}
+
+type diagnoser struct {
+	addr           *net.TCPAddr
+	scrapeInterval time.Duration
+	gui            GUI
+}
+
+func NewDiagnoser(addr *net.TCPAddr, scrapeInterval time.Duration, gui GUI) Diagnoser {
+	return &diagnoser{
+		addr:           addr,
+		scrapeInterval: scrapeInterval,
+		gui:            gui,
+	}
+}
+
 // Run performs the scraper which periodically scrapes from the agent,
 // and then draws charts to show the stats.
-func Run(addr *net.TCPAddr, scrapeInterval time.Duration) error {
+func (d *diagnoser) Run() error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	statsCh := make(chan *stats.Stats)
-	meta, err := startScraping(ctx, addr, scrapeInterval, statsCh)
+	meta, err := d.startScraping(ctx, statsCh)
 	if err != nil {
 		return err
 	}
-	g := gui.NewGUI(scrapeInterval, cancel, statsCh, meta)
-	return g.Run(ctx)
+	if d.gui == nil {
+		d.gui = tui.NewTUI(d.scrapeInterval, cancel, statsCh, meta)
+	}
+	return d.gui.Run(ctx)
 }
 
-func startScraping(ctx context.Context, addr *net.TCPAddr, interval time.Duration, statsCh chan<- *stats.Stats) (*stats.Meta, error) {
-	conn, err := net.DialTCP("tcp", nil, addr)
+func (d *diagnoser) startScraping(ctx context.Context, statsCh chan<- *stats.Stats) (*stats.Meta, error) {
+	conn, err := net.DialTCP("tcp", nil, d.addr)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +75,7 @@ func startScraping(ctx context.Context, addr *net.TCPAddr, interval time.Duratio
 	}
 
 	go func(ctx context.Context, ch chan<- *stats.Stats) {
-		tick := time.NewTicker(interval)
+		tick := time.NewTicker(d.scrapeInterval)
 		defer tick.Stop()
 		for {
 			select {
@@ -59,7 +83,7 @@ func startScraping(ctx context.Context, addr *net.TCPAddr, interval time.Duratio
 				return
 			case <-tick.C:
 				// TODO: Reuse connections instead of creating each time.
-				conn, err := net.DialTCP("tcp", nil, addr)
+				conn, err := net.DialTCP("tcp", nil, d.addr)
 				if err != nil {
 					logrus.Errorf("failed to create connection: %v", err)
 					continue

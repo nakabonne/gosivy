@@ -1,5 +1,6 @@
 ignore:
-  - "diagnoser/gui/widgets.mock.go"
+  - "diagnoser/tui/widgets.mock.go"
+  - "diagnoser/diagnoser.mock.go"
   - "examples"
 
 coverage:
