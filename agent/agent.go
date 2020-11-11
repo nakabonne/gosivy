@@ -18,6 +18,7 @@ import (
 	"strings"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/nakabonne/gosivy/process"
 	"github.com/nakabonne/gosivy/stats"
@@ -124,11 +125,10 @@ func gracefulShutdown() {
 }
 
 func listen() {
-	sig := make([]byte, 1)
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			// TODO: Find better way to check for closed connection, see: https://golang.org/issues/4373.
+			// TODO: Use net.ErrClosed after upgrading Go1.16, see: https://golang.org/issues/4373.
 			if !strings.Contains(err.Error(), "use of closed network connection") {
 				fmt.Fprintf(logWriter, "gosivy: %v\n", err)
 			}
@@ -137,43 +137,52 @@ func listen() {
 			}
 			continue
 		}
-		if _, err := conn.Read(sig); err != nil {
-			fmt.Fprintf(logWriter, "gosivy: %v\n", err)
-			continue
-		}
-		if err := handle(conn, sig); err != nil {
-			fmt.Fprintf(logWriter, "gosivy: %v\n", err)
-			continue
-		}
-		conn.Close()
+		fmt.Fprintf(logWriter, "gosivy: accept %v\n", conn.RemoteAddr())
+		go func() {
+			if err := handle(conn); err != nil {
+				fmt.Fprintf(logWriter, "gosivy: %v\n", err)
+			}
+		}()
 	}
 }
 
-func handle(conn io.ReadWriter, msg []byte) error {
-	switch msg[0] {
-	case stats.SignalMeta:
-		meta, err := stats.NewMeta()
-		if err != nil {
+// handle keeps using the given connection until an issue occurred.
+func handle(conn net.Conn) error {
+	defer conn.Close()
+
+	for {
+		conn.SetReadDeadline(time.Now().Add(5 * time.Second))
+		sig := make([]byte, 1)
+		if _, err := conn.Read(sig); err != nil {
 			return err
 		}
-		b, err := json.Marshal(meta)
-		if err != nil {
-			return err
+		switch sig[0] {
+		case stats.SignalMeta:
+			meta, err := stats.NewMeta()
+			if err != nil {
+				return err
+			}
+			b, err := json.Marshal(meta)
+			if err != nil {
+				return err
+			}
+			if _, err := conn.Write(append(b, stats.Delimiter)); err != nil {
+				return err
+			}
+		case stats.SignalStats:
+			s, err := stats.NewStats()
+			if err != nil {
+				return err
+			}
+			b, err := json.Marshal(s)
+			if err != nil {
+				return err
+			}
+			if _, err := conn.Write(append(b, stats.Delimiter)); err != nil {
+				return err
+			}
+		default:
+			return fmt.Errorf("unknown signal received: %b", sig[0])
 		}
-		_, err = conn.Write(b)
-		return err
-	case stats.SignalStats:
-		s, err := stats.NewStats()
-		if err != nil {
-			return err
-		}
-		b, err := json.Marshal(s)
-		if err != nil {
-			return err
-		}
-		_, err = conn.Write(b)
-		return err
-	default:
-		return fmt.Errorf("unknown signal received: %b", msg[0])
 	}
 }

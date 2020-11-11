@@ -8,4 +8,7 @@ const (
 
 	// SignalStats reports Go process stats.
 	SignalStats = byte(0x2)
+
+	// Delimiter indicates to complete the writing.
+	Delimiter = '\n'
 )
