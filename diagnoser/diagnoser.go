@@ -6,6 +6,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net"
 	"time"
 
@@ -57,7 +58,7 @@ func (d *diagnoser) Run() error {
 func (d *diagnoser) startScraping(ctx context.Context, statsCh chan<- *stats.Stats) (*stats.Meta, error) {
 	conn, err := net.DialTCP("tcp", nil, d.addr)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to dial TCP: %w", err)
 	}
 
 	// First up, fetch meta data of process,
@@ -67,11 +68,11 @@ func (d *diagnoser) startScraping(ctx context.Context, statsCh chan<- *stats.Sta
 	reader := bufio.NewReader(conn)
 	res, err := reader.ReadBytes(stats.Delimiter)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read metadata: %w", err)
 	}
 	var meta stats.Meta
 	if err := json.Unmarshal(res, &meta); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to decode metadata: %w", err)
 	}
 
 	go func(ctx context.Context, ch chan<- *stats.Stats) {

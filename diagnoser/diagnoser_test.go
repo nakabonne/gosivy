@@ -40,10 +40,10 @@ func startServer() *net.TCPAddr {
 			switch sig[0] {
 			case stats.SignalMeta:
 				b, _ := json.Marshal(&stats.Meta{})
-				_, _ = conn.Write(b)
+				_, _ = conn.Write(append(b, stats.Delimiter))
 			case stats.SignalStats:
 				b, _ := json.Marshal(&stats.Stats{})
-				_, _ = conn.Write(b)
+				_, _ = conn.Write(append(b, stats.Delimiter))
 			}
 			conn.Close()
 		}
