@@ -3,9 +3,10 @@
 package diagnoser
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"fmt"
 	"net"
 	"time"
 
@@ -57,24 +58,25 @@ func (d *diagnoser) Run() error {
 func (d *diagnoser) startScraping(ctx context.Context, statsCh chan<- *stats.Stats) (*stats.Meta, error) {
 	conn, err := net.DialTCP("tcp", nil, d.addr)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to dial TCP: %w", err)
 	}
+
 	// First up, fetch meta data of process,
-	buf := []byte{stats.SignalMeta}
-	if _, err := conn.Write(buf); err != nil {
+	if _, err := conn.Write([]byte{stats.SignalMeta}); err != nil {
 		return nil, err
 	}
-	res, err := ioutil.ReadAll(conn)
+	reader := bufio.NewReader(conn)
+	res, err := reader.ReadBytes(stats.Delimiter)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read metadata: %w", err)
 	}
-	conn.Close()
 	var meta stats.Meta
 	if err := json.Unmarshal(res, &meta); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to decode metadata: %w", err)
 	}
 
 	go func(ctx context.Context, ch chan<- *stats.Stats) {
+		defer conn.Close()
 		tick := time.NewTicker(d.scrapeInterval)
 		defer tick.Stop()
 		for {
@@ -82,24 +84,26 @@ func (d *diagnoser) startScraping(ctx context.Context, statsCh chan<- *stats.Sta
 			case <-ctx.Done():
 				return
 			case <-tick.C:
-				// TODO: Reuse connections instead of creating each time.
-				conn, err := net.DialTCP("tcp", nil, d.addr)
-				if err != nil {
-					logrus.Errorf("failed to create connection: %v", err)
-					continue
+				if conn == nil {
+					conn, err = net.DialTCP("tcp", nil, d.addr)
+					if err != nil {
+						logrus.Errorf("failed to dial: %v", err)
+						continue
+					}
 				}
 
-				buf := []byte{stats.SignalStats}
-				if _, err := conn.Write(buf); err != nil {
+				if _, err := conn.Write([]byte{stats.SignalStats}); err != nil {
 					logrus.Errorf("failed to write into connection: %v", err)
+					conn = nil
 					continue
 				}
-				res, err := ioutil.ReadAll(conn)
+				reader.Reset(conn)
+				res, err := reader.ReadBytes(stats.Delimiter)
 				if err != nil {
 					logrus.Errorf("failed to read the response: %v", err)
+					conn = nil
 					continue
 				}
-				conn.Close()
 
 				var stats stats.Stats
 				if err := json.Unmarshal(res, &stats); err != nil {
