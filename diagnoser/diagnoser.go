@@ -1,4 +1,4 @@
-// Package diagnoser mainly provides two components, scraper and TUI
+// Package diagnoser mainly provides two components, scraper and GUI
 // for the process diagnosis.
 package diagnoser
 

@@ -40,7 +40,7 @@ type Options struct {
 	// By default "127.0.0.1:0" is populated.
 	Addr string
 
-	// Where to emit the log to. By default os.Stderr is used.
+	// Where to emit the log to. By default ioutil.Discard is used.
 	LogWriter io.Writer
 }
 
@@ -55,7 +55,7 @@ func Listen(opts Options) error {
 	defer mu.Unlock()
 	logWriter = opts.LogWriter
 	if logWriter == nil {
-		logWriter = os.Stderr
+		logWriter = ioutil.Discard
 	}
 
 	if pidFile != "" {
@@ -149,7 +149,6 @@ func listen() {
 // handle keeps using the given connection until an issue occurred.
 func handle(conn net.Conn) error {
 	defer conn.Close()
-
 	for {
 		conn.SetReadDeadline(time.Now().Add(5 * time.Second))
 		sig := make([]byte, 1)
