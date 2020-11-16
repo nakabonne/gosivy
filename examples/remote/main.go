@@ -10,7 +10,7 @@ import (
 
 func main() {
 	err := agent.Listen(agent.Options{
-		Addr: "127.0.0.1:9090",
+		Addr: ":9090",
 	})
 	if err != nil {
 		log.Fatal(err)
