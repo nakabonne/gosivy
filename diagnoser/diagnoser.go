@@ -72,7 +72,7 @@ func (d *diagnoser) startScraping(ctx context.Context, statsCh chan<- *stats.Sta
 	}
 	var meta stats.Meta
 	if err := json.Unmarshal(res, &meta); err != nil {
-		return nil, fmt.Errorf("failed to decode metadata: %w", err)
+		return nil, fmt.Errorf("failed to decode metadata(%s): %w", string(res), err)
 	}
 
 	go func(ctx context.Context, ch chan<- *stats.Stats) {
