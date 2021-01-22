@@ -20,14 +20,14 @@ brew install nakabonne/gosivy/gosivy
 #### RHEL/CentOS
 
 ```
-rpm -ivh https://github.com/nakabonne/gosivy/releases/download/v0.2.0/gosivy_0.2.0_linux_amd64.rpm
+rpm -ivh https://github.com/nakabonne/gosivy/releases/download/v0.2.0/gosivy_0.2.0_linux_$(dpkg --print-architecture).rpm
 ```
 
 #### Debian/Ubuntu
 
 ```
-wget https://github.com/nakabonne/gosivy/releases/download/v0.2.0/gosivy_0.2.0_linux_amd64.deb
-apt install ./gosivy_0.2.0_linux_amd64.deb
+wget https://github.com/nakabonne/gosivy/releases/download/v0.2.0/gosivy_0.2.0_linux_$(dpkg --print-architecture).deb
+apt install ./gosivy_0.2.0_linux_$(dpkg --print-architecture).deb
 ```
 
 #### Go
