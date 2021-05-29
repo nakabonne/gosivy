@@ -24,7 +24,7 @@ snapshot:
   name_template: "{{ .Tag }}-next"
 
 brews:
-  - github:
+  - tap:
       owner: nakabonne
       name: homebrew-gosivy
     homepage: 'https://github.com/nakabonne/gosivy'
