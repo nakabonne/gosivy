@@ -11,7 +11,7 @@ Gosivy tracks Go process's metrics and plot their evolution over time right into
 ## Installation
 Binary releases are available through [here](https://github.com/nakabonne/gosivy/releases).
 
-#### MacOS
+#### macOS
 
 ```
 brew install nakabonne/gosivy/gosivy
