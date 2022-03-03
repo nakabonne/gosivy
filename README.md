@@ -33,7 +33,7 @@ apt install ./gosivy_0.2.0_linux_$(dpkg --print-architecture).deb
 #### Go
 Required: >= 1.10
 ```
-go get github.com/nakabonne/gosivy
+go install github.com/nakabonne/gosivy@latest
 ```
 
 ## Quickstart
